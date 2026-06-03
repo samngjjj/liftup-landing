@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFTUP | 專為長者打造的居家防跌 AR 遊戲化平台</title>
+    <meta name="description" content="LIFTUP 專為長者設計的居家防跌 AR 訓練平台。免購買昂貴設備，用手機就能把專業防跌訓練變成好玩的 AR 闖關遊戲！">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
+            background-color: #0a0a0f;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: block;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 0%, rgba(255, 222, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(255, 180, 0, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Logo */
+        .logo-container {
+            margin-bottom: 40px;
+            font-size: 32pt;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: -1px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo-lift {
+            color: #FFDE00;
+            text-shadow: 0 0 30px rgba(255, 222, 0, 0.3);
+        }
+
+        .logo-up {
+            color: #ffffff;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 36px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, rgba(255, 222, 0, 0.1) 0%, rgba(255, 180, 0, 0.05) 100%);
+            border: 1px solid rgba(255, 222, 0, 0.2);
+            border-radius: 14px;
+            padding: 14px 22px;
+            min-width: 130px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 222, 0, 0.4);
+        }
+
+        .stat-icon {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .stat-number {
+            font-family: 'Inter', sans-serif;
+            font-size: 22pt;
+            font-weight: 900;
+            color: #FFDE00;
+            display: block;
+            line-height: 1.2;
+            min-height: 36px;
+        }
+
+        .stat-number .loading-dots {
+            display: inline-block;
+            font-size: 14pt;
+            color: rgba(255, 222, 0, 0.5);
+        }
+
+        .stat-label {
+            font-size: 9.5pt;
+            color: #a0aec0;
+            margin-top: 2px;
+        }
+
+        /* Pulse animation for live dot */
+        .live-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background-color: #00e676;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
+        }
+
+        h1 {
+            font-size: 22pt;
+            font-weight: 700;
+            line-height: 1.4;
+            color: #ffffff;
+            margin-bottom: 16px;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        h1 span {
+            color: #FFDE00;
+            position: relative;
+        }
+
+        h1 span::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #FFDE00, rgba(255, 222, 0, 0));
+            border-radius: 2px;
+        }
+
+        .subtitle {
+            font-size: 11pt;
+            color: #a0aec0;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            padding: 0 10px;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        /* Feature Section */
+        .features {
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(20, 20, 30, 0.8) 100%);
+            border: 1px solid #2d2d2d;
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 40px;
+            text-align: left;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: fadeInUp 0.8s ease-out 0.5s both;
+        }
+
+        .feature-item {
+            margin-bottom: 22px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .feature-item:hover {
+            background-color: rgba(255, 222, 0, 0.05);
+            transform: translateX(4px);
+        }
+
+        .feature-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .feature-title {
+            font-size: 12.5pt;
+            font-weight: bold;
+            color: #FFDE00;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .feature-desc {
+            font-size: 10.5pt;
+            color: #cbd5e0;
+            line-height: 1.6;
+        }
+
+        /* CTA Button Styling */
+        .cta-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #FFDE00 0%, #FFB800 100%);
+            color: #0a0a0f;
+            text-decoration: none;
+            font-size: 13.5pt;
+            font-weight: bold;
+            padding: 18px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(255, 222, 0, 0.25), 0 0 40px rgba(255, 222, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 20px;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(255, 222, 0, 0.35), 0 0 60px rgba(255, 222, 0, 0.15);
+        }
+
+        .cta-btn:hover::before {
+            left: 100%;
+        }
+
+        .cta-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Click feedback ripple */
+        .cta-btn .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple-effect 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .notice {
+            font-size: 9.5pt;
+            color: #718096;
+            line-height: 1.4;
+            animation: fadeInUp 0.8s ease-out 0.7s both;
+        }
+
+        .footer {
+            margin-top: 60px;
+            font-size: 8.5pt;
+            color: #4a5568;
+            animation: fadeInUp 0.8s ease-out 0.8s both;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid rgba(255, 222, 0, 0.3);
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 10.5pt;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Number count-up animation */
+        .count-animate {
+            animation: countPop 0.4s ease-out;
+        }
+
+        @keyframes countPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Keyframe animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .stats-bar {
+                gap: 12px;
+            }
+            .stat-item {
+                min-width: 110px;
+                padding: 12px 16px;
+            }
+            .stat-number {
+                font-size: 18pt;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Logo -->
+    <div class="logo-container">
+        <span class="logo-lift">LIFT</span><span class="logo-up">UP</span>
+    </div>
+
+    <!-- Live Stats Bar -->
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-item">
+            <div class="stat-icon">👁️</div>
+            <span class="stat-number" id="viewCount">
+                <span class="loading-dots">...</span>
+            </span>
+            <div class="stat-label"><span class="live-dot"></span>總瀏覽人次</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-icon">🖱️</div>
+            <span class="stat-number" id="clickCount">
+                <span class="loading-dots">...</span>
+            </span>
+            <div class="stat-label">按鈕點擊次數</div>
+        </div>
+    </div>
+
+    <!-- Main Headline -->
+    <h1>別讓一次意外跌倒<br>帶走父母的<span>行動自由</span></h1>
+
+    <!-- Subtitle -->
+    <p class="subtitle">
+        專為長者設計的居家防跌 AR 訓練平台。免購買昂貴設備，用手機就能把專業防跌訓練變成好玩的 AR 闖關遊戲！
+    </p>
+
+    <!-- App Brief Features -->
+    <div class="features">
+        <div class="feature-item">
+            <span class="feature-title">💡 復健變遊戲</span>
+            <span class="feature-desc">獨家 AR 互動技術，長者踩步、擺手就能在家破關，趣味性滿分。</span>
+        </div>
+        <div class="feature-item">
+            <span class="feature-title">🛡️ 隱私安全第一</span>
+            <span class="feature-desc">採用 Edge AI 邊緣運算技術，影像純本地處理，絕不上傳雲端。</span>
+        </div>
+        <div class="feature-item">
+            <span class="feature-title">📊 數據隨時看</span>
+            <span class="feature-desc">自動量化運動表現，子女打開手機就能隨時掌握父母的平衡力與進度。</span>
+        </div>
+    </div>
+
+    <!-- CTA Button -->
+    <button class="cta-btn" id="downloadBtn" onclick="handleCtaClick(event)">
+        搶先下載體驗 (iOS / Android)
+    </button>
+
+    <p class="notice">
+        ※ 點擊按鈕將優先加入首波「免費能力檢測」內測名單
+    </p>
+
+    <div class="footer">
+        &copy; 2026 LIFTUP Co. 專注居家防跌與 AR 邊緣運算大健康生態。
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // ============================================
+    // Counter API Configuration
+    // Using counterapi.dev (free, no registration)
+    // ============================================
+    const NAMESPACE = 'samngjjj-liftup';
+    const VIEW_KEY = 'page-views';
+    const CLICK_KEY = 'cta-clicks';
+    const API_BASE = 'https://api.counterapi.dev/v1';
+
+    // ============================================
+    // Display helpers
+    // ============================================
+    function animateNumber(el, num) {
+        el.textContent = num.toLocaleString();
+        el.classList.remove('count-animate');
+        // Trigger reflow for animation restart
+        void el.offsetWidth;
+        el.classList.add('count-animate');
+    }
+
+    function showToast(message, duration = 3500) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), duration);
+    }
+
+    // ============================================
+    // Counter API calls
+    // ============================================
+
+    // Increment page view on load
+    async function trackPageView() {
+        const viewEl = document.getElementById('viewCount');
+        try {
+            const res = await fetch(`${API_BASE}/${NAMESPACE}/${VIEW_KEY}/up`);
+            if (!res.ok) throw new Error('API error');
+            const data = await res.json();
+            animateNumber(viewEl, data.count);
+        } catch (err) {
+            console.warn('View counter failed:', err);
+            viewEl.textContent = '–';
+        }
+    }
+
+    // Get current click count on load (without incrementing)
+    async function loadClickCount() {
+        const clickEl = document.getElementById('clickCount');
+        try {
+            const res = await fetch(`${API_BASE}/${NAMESPACE}/${CLICK_KEY}`);
+            if (!res.ok) throw new Error('API error');
+            const data = await res.json();
+            animateNumber(clickEl, data.count);
+        } catch (err) {
+            console.warn('Click counter load failed:', err);
+            clickEl.textContent = '0';
+        }
+    }
+
+    // Increment click counter
+    async function trackClick() {
+        const clickEl = document.getElementById('clickCount');
+        try {
+            const res = await fetch(`${API_BASE}/${NAMESPACE}/${CLICK_KEY}/up`);
+            if (!res.ok) throw new Error('API error');
+            const data = await res.json();
+            animateNumber(clickEl, data.count);
+        } catch (err) {
+            console.warn('Click counter failed:', err);
+        }
+    }
+
+    // ============================================
+    // CTA Button Handler
+    // ============================================
+    function handleCtaClick(event) {
+        // Ripple effect
+        const btn = event.currentTarget;
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+        btn.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+
+        // Track click
+        trackClick();
+
+        // Show toast notification
+        showToast('🎉 感謝您的支持！已加入優先體驗名單，上線時第一時間通知您！');
+    }
+
+    // ============================================
+    // Initialize on page load
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+        trackPageView();
+        loadClickCount();
+    });
+</script>
+
+</body>
+</html>

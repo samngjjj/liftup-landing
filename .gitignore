@@ -1,0 +1,5 @@
+# Ignore video files
+*.mp4
+
+# Ignore old HTML
+liftup_landing_page_v2.html
