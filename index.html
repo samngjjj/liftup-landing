@@ -5,525 +5,1147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LIFTUP | 專為長者打造的居家防跌 AR 遊戲化平台</title>
     <meta name="description" content="LIFTUP 專為長者設計的居家防跌 AR 訓練平台。免購買昂貴設備，用手機就能把專業防跌訓練變成好玩的 AR 闖關遊戲！">
+    <meta property="og:title" content="LIFTUP | 居家防跌 AR 遊戲化平台">
+    <meta property="og:description" content="專為長者設計，用手機就能進行專業防跌訓練的 AR 闖關遊戲">
+    <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
+        /* ===== CSS Reset & Base ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gold: #FFDE00;
+            --gold-dim: #D4B800;
+            --gold-glow: rgba(255, 222, 0, 0.15);
+            --gold-glow-strong: rgba(255, 222, 0, 0.35);
+            --bg-primary: #06060b;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-gold: rgba(255, 222, 0, 0.15);
+            --text-primary: #f0f0f5;
+            --text-secondary: #8a8a9a;
+            --text-muted: #55556a;
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
         }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
-            background-color: #0a0a0f;
-            color: #ffffff;
-            margin: 0;
-            padding: 0;
-            display: block;
-            min-height: 100vh;
+            font-family: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Animated background gradient */
-        body::before {
-            content: '';
+        /* ===== Particle Canvas ===== */
+        #particles {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                radial-gradient(ellipse at 20% 0%, rgba(255, 222, 0, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 100%, rgba(255, 180, 0, 0.05) 0%, transparent 50%);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ===== Ambient Glow Orbs ===== */
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
             pointer-events: none;
             z-index: 0;
+            opacity: 0.4;
+        }
+        .glow-orb-1 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(255,222,0,0.12), transparent 70%);
+            top: -100px; left: -100px;
+            animation: orbFloat1 20s ease-in-out infinite;
+        }
+        .glow-orb-2 {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,180,0,0.08), transparent 70%);
+            bottom: -50px; right: -80px;
+            animation: orbFloat2 25s ease-in-out infinite;
+        }
+        .glow-orb-3 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255,222,0,0.06), transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation: orbFloat3 18s ease-in-out infinite;
         }
 
-        .container {
-            max-width: 600px;
+        @keyframes orbFloat1 {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(60px, 40px); }
+            66% { transform: translate(-30px, 70px); }
+        }
+        @keyframes orbFloat2 {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-50px, -30px); }
+            66% { transform: translate(40px, -60px); }
+        }
+        @keyframes orbFloat3 {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
+        }
+
+        /* ===== Navigation ===== */
+        .nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.4s ease;
+        }
+        .nav.scrolled {
+            background: rgba(6, 6, 11, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 12px 32px;
+        }
+        .nav-logo {
+            font-family: 'Inter', sans-serif;
+            font-size: 20pt;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: -1px;
+            text-decoration: none;
+        }
+        .nav-logo .gold { color: var(--gold); }
+        .nav-logo .white { color: #fff; }
+        .nav-links { display: flex; gap: 28px; align-items: center; }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 10pt;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-cta {
+            background: var(--gold) !important;
+            color: var(--bg-primary) !important;
+            padding: 8px 20px !important;
+            border-radius: 50px;
+            font-weight: 700 !important;
+            font-size: 9.5pt !important;
+            transition: all 0.3s ease !important;
+        }
+        .nav-cta:hover {
+            box-shadow: 0 0 20px var(--gold-glow-strong);
+            transform: translateY(-1px);
+        }
+
+        /* ===== Sections Common ===== */
+        section {
+            position: relative;
+            z-index: 1;
+        }
+        .section-inner {
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 0 24px;
+        }
+
+        /* ===== Reveal Animation ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+
+        /* ===== Hero Section ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 24px 80px;
+        }
+        .hero-content { max-width: 700px; }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 9pt;
+            color: var(--gold);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        .hero-badge .dot {
+            width: 6px; height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .hero h1 {
+            font-size: clamp(28pt, 5vw, 42pt);
+            font-weight: 900;
+            line-height: 1.25;
+            margin-bottom: 24px;
+            letter-spacing: -0.5px;
+            animation: fadeInUp 0.8s ease-out 0.15s both;
+        }
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--gold) 0%, #FFA500 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-size: 12.5pt;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            max-width: 520px;
+            margin: 0 auto 44px;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease-out 0.45s both;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--gold) 0%, #FFB800 100%);
+            color: var(--bg-primary);
+            font-size: 11.5pt;
+            font-weight: 700;
+            padding: 16px 36px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 24px var(--gold-glow);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 36px var(--gold-glow-strong);
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            transition: left 0.5s;
+        }
+        .btn-primary:hover::after { left: 100%; }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 11pt;
+            font-weight: 500;
+            padding: 16px 32px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.12);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .btn-outline:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(255, 222, 0, 0.05);
+        }
+
+        /* ===== Live Stats Strip ===== */
+        .stats-strip {
+            padding: 20px 0;
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(255, 255, 255, 0.01);
+        }
+        .stats-strip .section-inner {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+        .stat-pill {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 8px 0;
+        }
+        .stat-pill-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .stat-pill-icon.views {
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(99,102,241,0.05));
+            border: 1px solid rgba(99,102,241,0.2);
+        }
+        .stat-pill-icon.clicks {
+            background: linear-gradient(135deg, rgba(255,222,0,0.15), rgba(255,222,0,0.05));
+            border: 1px solid rgba(255,222,0,0.2);
+        }
+        .stat-pill-icon.trust {
+            background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05));
+            border: 1px solid rgba(16,185,129,0.2);
+        }
+        .stat-pill-info { text-align: left; }
+        .stat-pill-number {
+            font-family: 'Inter', sans-serif;
+            font-size: 18pt;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1;
+            min-width: 40px;
+            display: block;
+        }
+        .stat-pill-number .loading-shimmer {
+            display: inline-block;
+            width: 48px;
+            height: 22px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .stat-pill-label {
+            font-size: 9pt;
+            color: var(--text-muted);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .live-dot {
+            width: 6px; height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+            50% { opacity: 0.6; box-shadow: 0 0 0 5px rgba(16,185,129,0); }
+        }
+
+        /* ===== Problem Section ===== */
+        .problem {
+            padding: 100px 0;
+        }
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .problem-text .eyebrow {
+            font-size: 9pt;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+        .problem-text h2 {
+            font-size: 24pt;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 20px;
+        }
+        .problem-text p {
+            font-size: 11pt;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+        .problem-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .problem-stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .problem-stat-card:hover {
+            border-color: var(--border-gold);
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+        }
+        .problem-stat-card .big-num {
+            font-family: 'Inter', sans-serif;
+            font-size: 28pt;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .problem-stat-card .stat-desc {
+            font-size: 9.5pt;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ===== Features Section ===== */
+        .features {
+            padding: 100px 0;
+        }
+        .section-header {
+            text-align: center;
+            max-width: 550px;
+            margin: 0 auto 64px;
+        }
+        .section-header .eyebrow {
+            font-size: 9pt;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+        .section-header h2 {
+            font-size: 24pt;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 16px;
+        }
+        .section-header p {
+            font-size: 11pt;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 36px 28px;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .feature-card:hover {
+            border-color: var(--border-gold);
+            background: var(--bg-card-hover);
+            transform: translateY(-6px);
+        }
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(255,222,0,0.1), rgba(255,180,0,0.05));
+            border: 1px solid rgba(255,222,0,0.12);
+        }
+        .feature-card h3 {
+            font-size: 13pt;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        .feature-card p {
+            font-size: 10pt;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ===== How It Works ===== */
+        .how-it-works {
+            padding: 100px 0;
+        }
+        .steps {
+            display: flex;
+            gap: 24px;
+            position: relative;
+        }
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 60px;
+            right: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--border-subtle), var(--gold));
+            z-index: 0;
+        }
+        .step {
+            flex: 1;
             text-align: center;
             position: relative;
             z-index: 1;
         }
-
-        /* Logo */
-        .logo-container {
-            margin-bottom: 40px;
-            font-size: 32pt;
-            font-weight: 900;
-            font-style: italic;
-            letter-spacing: -1px;
-            animation: fadeInDown 0.8s ease-out;
-        }
-
-        .logo-lift {
-            color: #FFDE00;
-            text-shadow: 0 0 30px rgba(255, 222, 0, 0.3);
-        }
-
-        .logo-up {
-            color: #ffffff;
-        }
-
-        /* Stats Bar */
-        .stats-bar {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-bottom: 36px;
-            animation: fadeInUp 0.8s ease-out 0.2s both;
-        }
-
-        .stat-item {
-            background: linear-gradient(135deg, rgba(255, 222, 0, 0.1) 0%, rgba(255, 180, 0, 0.05) 100%);
-            border: 1px solid rgba(255, 222, 0, 0.2);
-            border-radius: 14px;
-            padding: 14px 22px;
-            min-width: 130px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255, 222, 0, 0.4);
-        }
-
-        .stat-icon {
-            font-size: 18px;
-            margin-bottom: 4px;
-        }
-
-        .stat-number {
-            font-family: 'Inter', sans-serif;
-            font-size: 22pt;
-            font-weight: 900;
-            color: #FFDE00;
-            display: block;
-            line-height: 1.2;
-            min-height: 36px;
-        }
-
-        .stat-number .loading-dots {
-            display: inline-block;
-            font-size: 14pt;
-            color: rgba(255, 222, 0, 0.5);
-        }
-
-        .stat-label {
-            font-size: 9.5pt;
-            color: #a0aec0;
-            margin-top: 2px;
-        }
-
-        /* Pulse animation for live dot */
-        .live-dot {
-            display: inline-block;
-            width: 7px;
-            height: 7px;
-            background-color: #00e676;
+        .step-num {
+            width: 48px; height: 48px;
             border-radius: 50%;
-            margin-right: 5px;
-            vertical-align: middle;
-            animation: pulse 2s infinite;
+            background: linear-gradient(135deg, var(--gold), #FFB800);
+            color: var(--bg-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 16pt;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 20px var(--gold-glow);
         }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.5); }
-            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
-        }
-
-        h1 {
-            font-size: 22pt;
+        .step h3 {
+            font-size: 12pt;
             font-weight: 700;
-            line-height: 1.4;
-            color: #ffffff;
-            margin-bottom: 16px;
-            animation: fadeInUp 0.8s ease-out 0.3s both;
-        }
-
-        h1 span {
-            color: #FFDE00;
-            position: relative;
-        }
-
-        h1 span::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, #FFDE00, rgba(255, 222, 0, 0));
-            border-radius: 2px;
-        }
-
-        .subtitle {
-            font-size: 11pt;
-            color: #a0aec0;
-            line-height: 1.7;
-            margin-bottom: 40px;
-            padding: 0 10px;
-            animation: fadeInUp 0.8s ease-out 0.4s both;
-        }
-
-        /* Feature Section */
-        .features {
-            background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(20, 20, 30, 0.8) 100%);
-            border: 1px solid #2d2d2d;
-            border-radius: 20px;
-            padding: 28px;
-            margin-bottom: 40px;
-            text-align: left;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            animation: fadeInUp 0.8s ease-out 0.5s both;
-        }
-
-        .feature-item {
-            margin-bottom: 22px;
-            padding: 14px 16px;
-            border-radius: 12px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .feature-item:hover {
-            background-color: rgba(255, 222, 0, 0.05);
-            transform: translateX(4px);
-        }
-
-        .feature-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .feature-title {
-            font-size: 12.5pt;
-            font-weight: bold;
-            color: #FFDE00;
             margin-bottom: 8px;
-            display: block;
         }
-
-        .feature-desc {
-            font-size: 10.5pt;
-            color: #cbd5e0;
+        .step p {
+            font-size: 9.5pt;
+            color: var(--text-secondary);
             line-height: 1.6;
+            padding: 0 8px;
         }
 
-        /* CTA Button Styling */
-        .cta-btn {
-            display: block;
-            width: 100%;
-            background: linear-gradient(135deg, #FFDE00 0%, #FFB800 100%);
-            color: #0a0a0f;
-            text-decoration: none;
-            font-size: 13.5pt;
-            font-weight: bold;
-            padding: 18px;
-            border-radius: 50px;
-            box-shadow: 0 4px 20px rgba(255, 222, 0, 0.25), 0 0 40px rgba(255, 222, 0, 0.1);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            margin-bottom: 20px;
-            border: none;
-            cursor: pointer;
-            letter-spacing: 0.5px;
-            animation: fadeInUp 0.8s ease-out 0.6s both;
+        /* ===== CTA Section ===== */
+        .cta-section {
+            padding: 100px 0 80px;
+        }
+        .cta-box {
+            background: linear-gradient(135deg, rgba(255,222,0,0.06), rgba(255,180,0,0.02));
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-xl);
+            padding: 64px 40px;
+            text-align: center;
             position: relative;
             overflow: hidden;
         }
-
-        .cta-btn::before {
+        .cta-box::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s ease;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at center, rgba(255,222,0,0.04), transparent 50%);
+            animation: ctaGlow 8s ease-in-out infinite;
+        }
+        @keyframes ctaGlow {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        .cta-box > * { position: relative; z-index: 1; }
+        .cta-box h2 {
+            font-size: 22pt;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+        .cta-box p {
+            font-size: 11pt;
+            color: var(--text-secondary);
+            margin-bottom: 36px;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+        }
+        .cta-box .notice-text {
+            margin-top: 20px;
+            font-size: 9pt;
+            color: var(--text-muted);
         }
 
-        .cta-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 28px rgba(255, 222, 0, 0.35), 0 0 60px rgba(255, 222, 0, 0.15);
-        }
-
-        .cta-btn:hover::before {
-            left: 100%;
-        }
-
-        .cta-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Click feedback ripple */
-        .cta-btn .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0);
-            animation: ripple-effect 0.6s ease-out;
-            pointer-events: none;
-        }
-
-        @keyframes ripple-effect {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        .notice {
-            font-size: 9.5pt;
-            color: #718096;
-            line-height: 1.4;
-            animation: fadeInUp 0.8s ease-out 0.7s both;
-        }
-
+        /* ===== Footer ===== */
         .footer {
-            margin-top: 60px;
-            font-size: 8.5pt;
-            color: #4a5568;
-            animation: fadeInUp 0.8s ease-out 0.8s both;
+            border-top: 1px solid var(--border-subtle);
+            padding: 40px 0;
         }
+        .footer .section-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer-left {
+            font-size: 8.5pt;
+            color: var(--text-muted);
+        }
+        .footer-right {
+            display: flex;
+            gap: 20px;
+        }
+        .footer-right a {
+            font-size: 8.5pt;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .footer-right a:hover { color: var(--gold); }
 
-        /* Toast notification */
+        /* ===== Toast ===== */
         .toast {
             position: fixed;
-            bottom: 30px;
+            bottom: 32px;
             left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 1px solid rgba(255, 222, 0, 0.3);
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(10, 10, 20, 0.9);
+            border: 1px solid var(--border-gold);
             color: #fff;
-            padding: 14px 28px;
-            border-radius: 14px;
+            padding: 16px 32px;
+            border-radius: 16px;
             font-size: 10.5pt;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.5);
             z-index: 1000;
             opacity: 0;
-            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             max-width: 90%;
             text-align: center;
         }
-
         .toast.show {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
 
-        /* Number count-up animation */
-        .count-animate {
+        /* ===== Number animation ===== */
+        .count-pop {
             animation: countPop 0.4s ease-out;
         }
-
         @keyframes countPop {
-            0% { transform: scale(0.5); opacity: 0; }
-            60% { transform: scale(1.15); }
+            0% { transform: scale(0.6); opacity: 0; }
+            60% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Keyframe animations */
+        /* ===== Keyframes ===== */
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(24px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive */
-        @media (max-width: 400px) {
-            .stats-bar {
-                gap: 12px;
+        /* ===== Mobile Nav Toggle ===== */
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+        .nav-toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--text-primary);
+            margin: 5px 0;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .nav-toggle { display: block; }
+
+            .problem-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
             }
-            .stat-item {
-                min-width: 110px;
-                padding: 12px 16px;
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
             }
-            .stat-number {
-                font-size: 18pt;
+            .steps {
+                flex-direction: column;
+                gap: 32px;
+            }
+            .steps::before { display: none; }
+            .cta-box { padding: 48px 24px; }
+            .hero h1 { font-size: 24pt; }
+            .stat-pill { gap: 10px; }
+            .stats-strip .section-inner { gap: 24px; }
+            .section-header h2 { font-size: 20pt; }
+            .footer .section-inner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-strip .section-inner {
+                flex-direction: column;
+                gap: 16px;
+                align-items: center;
+            }
+            .hero-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            .problem-stats-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Logo -->
-    <div class="logo-container">
-        <span class="logo-lift">LIFT</span><span class="logo-up">UP</span>
+<!-- Ambient Glow -->
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+
+<!-- Particle Background -->
+<canvas id="particles"></canvas>
+
+<!-- Navigation -->
+<nav class="nav" id="nav">
+    <a href="#" class="nav-logo"><span class="gold">LIFT</span><span class="white">UP</span></a>
+    <div class="nav-links" id="navLinks">
+        <a href="#features">核心功能</a>
+        <a href="#how">使用流程</a>
+        <a href="#cta" class="nav-cta">立即體驗</a>
     </div>
-
-    <!-- Live Stats Bar -->
-    <div class="stats-bar" id="statsBar">
-        <div class="stat-item">
-            <div class="stat-icon">👁️</div>
-            <span class="stat-number" id="viewCount">
-                <span class="loading-dots">...</span>
-            </span>
-            <div class="stat-label"><span class="live-dot"></span>總瀏覽人次</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-icon">🖱️</div>
-            <span class="stat-number" id="clickCount">
-                <span class="loading-dots">...</span>
-            </span>
-            <div class="stat-label">按鈕點擊次數</div>
-        </div>
-    </div>
-
-    <!-- Main Headline -->
-    <h1>別讓一次意外跌倒<br>帶走父母的<span>行動自由</span></h1>
-
-    <!-- Subtitle -->
-    <p class="subtitle">
-        專為長者設計的居家防跌 AR 訓練平台。免購買昂貴設備，用手機就能把專業防跌訓練變成好玩的 AR 闖關遊戲！
-    </p>
-
-    <!-- App Brief Features -->
-    <div class="features">
-        <div class="feature-item">
-            <span class="feature-title">💡 復健變遊戲</span>
-            <span class="feature-desc">獨家 AR 互動技術，長者踩步、擺手就能在家破關，趣味性滿分。</span>
-        </div>
-        <div class="feature-item">
-            <span class="feature-title">🛡️ 隱私安全第一</span>
-            <span class="feature-desc">採用 Edge AI 邊緣運算技術，影像純本地處理，絕不上傳雲端。</span>
-        </div>
-        <div class="feature-item">
-            <span class="feature-title">📊 數據隨時看</span>
-            <span class="feature-desc">自動量化運動表現，子女打開手機就能隨時掌握父母的平衡力與進度。</span>
-        </div>
-    </div>
-
-    <!-- CTA Button -->
-    <button class="cta-btn" id="downloadBtn" onclick="handleCtaClick(event)">
-        搶先下載體驗 (iOS / Android)
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
     </button>
+</nav>
 
-    <p class="notice">
-        ※ 點擊按鈕將優先加入首波「免費能力檢測」內測名單
-    </p>
-
-    <div class="footer">
-        &copy; 2026 LIFTUP Co. 專注居家防跌與 AR 邊緣運算大健康生態。
+<!-- ===== Hero ===== -->
+<section class="hero" id="hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="dot"></span>
+            目前開放搶先體驗中
+        </div>
+        <h1>別讓一次意外跌倒<br>帶走父母的<span class="highlight">行動自由</span></h1>
+        <p class="hero-sub">
+            專為長者設計的居家防跌 AR 訓練平台。<br>
+            免昂貴設備，用手機就能把專業防跌訓練變成好玩的 AR 闖關遊戲。
+        </p>
+        <div class="hero-actions">
+            <button class="btn-primary" id="heroCta" onclick="handleCtaClick(event)">
+                🚀 搶先下載體驗
+            </button>
+            <a href="#features" class="btn-outline">
+                了解更多 ↓
+            </a>
+        </div>
     </div>
-</div>
+</section>
 
-<!-- Toast Notification -->
+<!-- ===== Live Stats Strip ===== -->
+<section class="stats-strip" id="stats">
+    <div class="section-inner">
+        <div class="stat-pill reveal">
+            <div class="stat-pill-icon views">👁️</div>
+            <div class="stat-pill-info">
+                <span class="stat-pill-number" id="viewCount"><span class="loading-shimmer"></span></span>
+                <div class="stat-pill-label"><span class="live-dot"></span>頁面瀏覽人次</div>
+            </div>
+        </div>
+        <div class="stat-pill reveal reveal-delay-1">
+            <div class="stat-pill-icon clicks">🖱️</div>
+            <div class="stat-pill-info">
+                <span class="stat-pill-number" id="clickCount"><span class="loading-shimmer"></span></span>
+                <div class="stat-pill-label">按鈕點擊次數</div>
+            </div>
+        </div>
+        <div class="stat-pill reveal reveal-delay-2">
+            <div class="stat-pill-icon trust">🔒</div>
+            <div class="stat-pill-info">
+                <span class="stat-pill-number">100%</span>
+                <div class="stat-pill-label">本地隱私處理</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== Problem Section ===== -->
+<section class="problem" id="problem">
+    <div class="section-inner">
+        <div class="problem-grid">
+            <div class="problem-text reveal">
+                <div class="eyebrow">為什麼重要</div>
+                <h2>跌倒，是長者失能的頭號殺手</h2>
+                <p>台灣每年有超過數萬名長者因跌倒就醫，而傳統復健枯燥、昂貴且難以持續。LIFTUP 用遊戲化 AR 技術，讓防跌訓練像玩遊戲一樣有趣。</p>
+            </div>
+            <div class="problem-stats-grid reveal reveal-delay-2">
+                <div class="problem-stat-card">
+                    <div class="big-num">30%</div>
+                    <div class="stat-desc">65歲以上長者<br>每年跌倒比例</div>
+                </div>
+                <div class="problem-stat-card">
+                    <div class="big-num">2×</div>
+                    <div class="stat-desc">跌倒後再次跌倒<br>風險倍增</div>
+                </div>
+                <div class="problem-stat-card">
+                    <div class="big-num">80%</div>
+                    <div class="stat-desc">居家環境<br>為主要跌倒地點</div>
+                </div>
+                <div class="problem-stat-card">
+                    <div class="big-num">$$$</div>
+                    <div class="stat-desc">傳統復健費用<br>每月動輒萬元</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== Features Section ===== -->
+<section class="features" id="features">
+    <div class="section-inner">
+        <div class="section-header reveal">
+            <div class="eyebrow">核心功能</div>
+            <h2>科技守護，讓訓練充滿樂趣</h2>
+            <p>結合 AR 擴增實境與 Edge AI 邊緣運算，打造最安全、最好玩的居家防跌訓練體驗。</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card reveal reveal-delay-1">
+                <div class="feature-icon">🎮</div>
+                <h3>復健變遊戲</h3>
+                <p>獨家 AR 互動技術，長者踩步、擺手就能在家破關，趣味性滿分，訓練不再枯燥。</p>
+            </div>
+            <div class="feature-card reveal reveal-delay-2">
+                <div class="feature-icon">🛡️</div>
+                <h3>隱私安全第一</h3>
+                <p>採用 Edge AI 邊緣運算技術，影像純本地處理，絕不上傳雲端，保護長者隱私。</p>
+            </div>
+            <div class="feature-card reveal reveal-delay-3">
+                <div class="feature-icon">📊</div>
+                <h3>數據隨時看</h3>
+                <p>自動量化運動表現，子女打開手機就能隨時掌握父母的平衡力與訓練進度。</p>
+            </div>
+            <div class="feature-card reveal reveal-delay-1">
+                <div class="feature-icon">🏠</div>
+                <h3>居家輕鬆練</h3>
+                <p>不需昂貴設備，一支手機就能在客廳開始訓練，隨時隨地，不受場地限制。</p>
+            </div>
+            <div class="feature-card reveal reveal-delay-2">
+                <div class="feature-icon">🏆</div>
+                <h3>社交競賽挑戰</h3>
+                <p>與朋友、家人一起比拚排行榜，社交互動讓訓練更有動力，養成運動好習慣。</p>
+            </div>
+            <div class="feature-card reveal reveal-delay-3">
+                <div class="feature-icon">🧠</div>
+                <h3>認知雙重訓練</h3>
+                <p>結合認知任務與肢體運動的雙重任務訓練，同時鍛鍊大腦與身體協調能力。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== How It Works ===== -->
+<section class="how-it-works" id="how">
+    <div class="section-inner">
+        <div class="section-header reveal">
+            <div class="eyebrow">使用流程</div>
+            <h2>三步驟，開始守護行動力</h2>
+            <p>簡單到阿公阿嬤也能輕鬆上手</p>
+        </div>
+        <div class="steps">
+            <div class="step reveal reveal-delay-1">
+                <div class="step-num">1</div>
+                <h3>下載 App</h3>
+                <p>從 App Store 或 Google Play 免費下載 LIFTUP 應用程式</p>
+            </div>
+            <div class="step reveal reveal-delay-2">
+                <div class="step-num">2</div>
+                <h3>能力檢測</h3>
+                <p>AI 自動評估長者的平衡力與體能狀態，量身打造訓練計畫</p>
+            </div>
+            <div class="step reveal reveal-delay-3">
+                <div class="step-num">3</div>
+                <h3>開始闖關</h3>
+                <p>每天 10 分鐘 AR 遊戲訓練，輕鬆養成防跌好習慣</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CTA Section ===== -->
+<section class="cta-section" id="cta">
+    <div class="section-inner">
+        <div class="cta-box reveal">
+            <h2>現在就加入搶先體驗</h2>
+            <p>免費加入首波「能力檢測」內測名單，App 上線時將第一時間通知您！</p>
+            <button class="btn-primary" id="ctaBtn" onclick="handleCtaClick(event)" style="font-size: 13pt; padding: 18px 48px;">
+                🎯 立即加入體驗名單
+            </button>
+            <p class="notice-text">※ 完全免費 · 無需信用卡 · 隨時可取消</p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+    <div class="section-inner">
+        <div class="footer-left">
+            &copy; 2026 LIFTUP Co. 專注居家防跌與 AR 邊緣運算大健康生態。
+        </div>
+        <div class="footer-right">
+            <a href="#">隱私政策</a>
+            <a href="#">服務條款</a>
+            <a href="#">聯絡我們</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-    // ============================================
-    // Counter API Configuration
-    // Using counterapi.dev (free, no registration)
-    // ============================================
-    const NAMESPACE = 'samngjjj-liftup';
-    const VIEW_KEY = 'page-views';
-    const CLICK_KEY = 'cta-clicks';
-    const API_BASE = 'https://api.counterapi.dev/v1';
+// ============================================
+// Particle System
+// ============================================
+(function initParticles() {
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    const PARTICLE_COUNT = 50;
 
-    // ============================================
-    // Display helpers
-    // ============================================
-    function animateNumber(el, num) {
-        el.textContent = num.toLocaleString();
-        el.classList.remove('count-animate');
-        // Trigger reflow for animation restart
-        void el.offsetWidth;
-        el.classList.add('count-animate');
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
     }
+    window.addEventListener('resize', resize);
+    resize();
 
-    function showToast(message, duration = 3500) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), duration);
-    }
-
-    // ============================================
-    // Counter API calls
-    // ============================================
-
-    // Increment page view on load
-    async function trackPageView() {
-        const viewEl = document.getElementById('viewCount');
-        try {
-            const res = await fetch(`${API_BASE}/${NAMESPACE}/${VIEW_KEY}/up`);
-            if (!res.ok) throw new Error('API error');
-            const data = await res.json();
-            animateNumber(viewEl, data.count);
-        } catch (err) {
-            console.warn('View counter failed:', err);
-            viewEl.textContent = '–';
+    class Particle {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 1.5 + 0.3;
+            this.speedX = (Math.random() - 0.5) * 0.3;
+            this.speedY = (Math.random() - 0.5) * 0.3;
+            this.opacity = Math.random() * 0.4 + 0.1;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 222, 0, ${this.opacity})`;
+            ctx.fill();
         }
     }
 
-    // Get current click count on load (without incrementing)
-    async function loadClickCount() {
-        const clickEl = document.getElementById('clickCount');
-        try {
-            const res = await fetch(`${API_BASE}/${NAMESPACE}/${CLICK_KEY}`);
-            if (!res.ok) throw new Error('API error');
-            const data = await res.json();
-            animateNumber(clickEl, data.count);
-        } catch (err) {
-            console.warn('Click counter load failed:', err);
-            clickEl.textContent = '0';
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push(new Particle());
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+
+        // Draw connections
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(255, 222, 0, ${0.03 * (1 - dist / 120)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
         }
+        requestAnimationFrame(animate);
     }
+    animate();
+})();
 
-    // Increment click counter
-    async function trackClick() {
-        const clickEl = document.getElementById('clickCount');
-        try {
-            const res = await fetch(`${API_BASE}/${NAMESPACE}/${CLICK_KEY}/up`);
-            if (!res.ok) throw new Error('API error');
-            const data = await res.json();
-            animateNumber(clickEl, data.count);
-        } catch (err) {
-            console.warn('Click counter failed:', err);
+// ============================================
+// Scroll Reveal
+// ============================================
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
         }
-    }
-
-    // ============================================
-    // CTA Button Handler
-    // ============================================
-    function handleCtaClick(event) {
-        // Ripple effect
-        const btn = event.currentTarget;
-        const ripple = document.createElement('span');
-        ripple.classList.add('ripple');
-        const rect = btn.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
-        ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
-        btn.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 600);
-
-        // Track click
-        trackClick();
-
-        // Show toast notification
-        showToast('🎉 感謝您的支持！已加入優先體驗名單，上線時第一時間通知您！');
-    }
-
-    // ============================================
-    // Initialize on page load
-    // ============================================
-    document.addEventListener('DOMContentLoaded', () => {
-        trackPageView();
-        loadClickCount();
     });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ============================================
+// Sticky Nav
+// ============================================
+window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ============================================
+// Mobile Nav Toggle
+// ============================================
+document.getElementById('navToggle').addEventListener('click', () => {
+    const links = document.getElementById('navLinks');
+    links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
+    if (window.innerWidth <= 768) {
+        links.style.flexDirection = 'column';
+        links.style.position = 'absolute';
+        links.style.top = '100%';
+        links.style.left = '0';
+        links.style.right = '0';
+        links.style.background = 'rgba(6,6,11,0.95)';
+        links.style.padding = '16px 24px';
+        links.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+        links.style.backdropFilter = 'blur(20px)';
+    }
+});
+
+// ============================================
+// Counter API
+// ============================================
+const NAMESPACE = 'samngjjj-liftup';
+const VIEW_KEY = 'page-views';
+const CLICK_KEY = 'cta-clicks';
+const API_BASE = 'https://api.counterapi.dev/v1';
+
+function animateNumber(el, num) {
+    el.textContent = num.toLocaleString();
+    el.classList.remove('count-pop');
+    void el.offsetWidth;
+    el.classList.add('count-pop');
+}
+
+function showToast(message, duration = 4000) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+async function trackPageView() {
+    const el = document.getElementById('viewCount');
+    try {
+        const res = await fetch(`${API_BASE}/${NAMESPACE}/${VIEW_KEY}/up`);
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        animateNumber(el, data.count);
+    } catch (err) {
+        console.warn('View counter failed:', err);
+        el.textContent = '–';
+    }
+}
+
+async function loadClickCount() {
+    const el = document.getElementById('clickCount');
+    try {
+        const res = await fetch(`${API_BASE}/${NAMESPACE}/${CLICK_KEY}`);
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        animateNumber(el, data.count);
+    } catch (err) {
+        console.warn('Click counter load failed:', err);
+        el.textContent = '0';
+    }
+}
+
+async function trackClick() {
+    const el = document.getElementById('clickCount');
+    try {
+        const res = await fetch(`${API_BASE}/${NAMESPACE}/${CLICK_KEY}/up`);
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
+        animateNumber(el, data.count);
+    } catch (err) {
+        console.warn('Click counter failed:', err);
+    }
+}
+
+function handleCtaClick(event) {
+    trackClick();
+    showToast('🎉 感謝您的支持！已加入首波優先體驗名單，App 上線時第一時間通知您！');
+}
+
+// ============================================
+// Init
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    trackPageView();
+    loadClickCount();
+});
 </script>
 
 </body>
