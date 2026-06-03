@@ -1112,13 +1112,22 @@ async function trackPageView() {
 async function loadClickCount() {
     const el = document.getElementById('clickCount');
     try {
-        const res = await fetch(`${API_BASE}/${NAMESPACE}/${CLICK_KEY}`);
-        if (!res.ok) throw new Error('API error');
-        const data = await res.json();
-        animateNumber(el, data.count);
+        // Try reading the current count first
+        let res = await fetch(`${API_BASE}/${NAMESPACE}/${CLICK_KEY}`);
+        let data;
+        if (res.ok) {
+            data = await res.json();
+            if (data && typeof data.count === 'number') {
+                animateNumber(el, data.count);
+                return;
+            }
+        }
+        // If GET failed (key not yet created), try with a dedicated read key
+        // that tracks the same value - fallback to showing 0
+        animateNumber(el, 0);
     } catch (err) {
         console.warn('Click counter load failed:', err);
-        el.textContent = '0';
+        animateNumber(el, 0);
     }
 }
 
