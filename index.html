@@ -676,6 +676,99 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* ===== Floating Share (LINE) Button ===== */
+        .share-fab {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            cursor: pointer;
+            animation: fabEntrance 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.5s both;
+        }
+        @keyframes fabEntrance {
+            from { opacity: 0; transform: scale(0.4) translateY(30px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .share-fab-btn {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #06C755 0%, #04B04A 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(6, 199, 85, 0.35), 0 0 0 0 rgba(6, 199, 85, 0.3);
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .share-fab-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.4);
+            animation: fabRipple 2.5s ease-out infinite;
+        }
+        @keyframes fabRipple {
+            0%   { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0.4); }
+            70%  { box-shadow: 0 0 0 14px rgba(6, 199, 85, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(6, 199, 85, 0); }
+        }
+        .share-fab-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 28px rgba(6, 199, 85, 0.5);
+        }
+        .share-fab-btn:active {
+            transform: scale(0.95);
+        }
+        .share-fab-btn svg {
+            width: 30px;
+            height: 30px;
+            fill: #fff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .share-fab-label {
+            background: rgba(10, 10, 20, 0.88);
+            border: 1px solid rgba(6, 199, 85, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #fff;
+            font-size: 9pt;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 10px;
+            margin-right: 12px;
+            white-space: nowrap;
+            opacity: 1;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .share-fab {
+                bottom: 20px;
+                right: 20px;
+            }
+            .share-fab-btn {
+                width: 54px;
+                height: 54px;
+            }
+            .share-fab-label {
+                display: none;
+            }
+        }
+
         /* ===== Number animation ===== */
         .count-pop {
             animation: countPop 0.4s ease-out;
@@ -965,6 +1058,16 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<!-- Floating LINE Share Button -->
+<div class="share-fab" id="shareFab">
+    <span class="share-fab-label">分享給家人 💚</span>
+    <button class="share-fab-btn" id="shareLineBtn" aria-label="分享至 LINE">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+        </svg>
+    </button>
+</div>
+
 <script>
 // ============================================
 // Particle System
@@ -1147,6 +1250,32 @@ function handleCtaClick(event) {
     trackClick();
     showToast('🎉 感謝您的支持！已加入首波優先體驗名單，App 上線時第一時間通知您！');
 }
+
+// ============================================
+// LINE Share Button
+// ============================================
+function shareToLine() {
+    const pageUrl = encodeURIComponent(window.location.href);
+    const shareText = encodeURIComponent('🏠 推薦給你一個超讚的居家防跌訓練 App — LIFTUP！用手機就能玩 AR 遊戲順便做防跌訓練，快來看看 👉');
+    
+    // Detect mobile device
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        // On mobile: use LINE's URL scheme to open the LINE app directly
+        window.location.href = `https://line.me/R/share?text=${shareText}%0A${pageUrl}`;
+    } else {
+        // On desktop: open LINE's social plugin share page
+        window.open(
+            `https://social-plugins.line.me/lineit/share?url=${pageUrl}`,
+            '_blank',
+            'width=600,height=500,scrollbars=yes'
+        );
+    }
+}
+
+document.getElementById('shareLineBtn').addEventListener('click', shareToLine);
+document.querySelector('.share-fab-label').addEventListener('click', shareToLine);
 
 // ============================================
 // Init
